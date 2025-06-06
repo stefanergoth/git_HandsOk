@@ -34,3 +34,4 @@ if args.motif:
 parser.add_argument("-m", "--motif", type = str, required = False, help = "Motif")
 
 #I added this in the master branch
+# I added this in the motif branch
