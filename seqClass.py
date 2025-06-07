@@ -1,40 +1,51 @@
 #!/usr/bin/env python
 
-# This code checks if an given seqence could be DNA or RNA 
-import sys, re
+import sys
+import re
 from argparse import ArgumentParser
 
-parser = ArgumentParser(description = 'Classify a sequence as DNA or RNA')
-parser.add_argument("-s", "--seq", type = str, required = True, help = "Input sequence")
+parser = ArgumentParser(
+    description='Classify a sequence as DNA, RNA, ambiguous (DNA or RNA), or neither, and optionally search for a motif'
+)
+parser.add_argument('-s', '--seq',
+                    type=str,
+                    required=True,
+                    help='Input sequence')
+parser.add_argument('-m', '--motif',
+                    type=str,
+                    help='Motif to search for')
 
 if len(sys.argv) == 1:
-    parser.print_help() #Prints help message
+    parser.print_help()
     sys.exit(1)
 
 args = parser.parse_args()
+seq = args.seq.upper()
 
-# IF-Loop to assess if a sequence is DNA/RNA
-args.seq = args.seq.upper()                 # Note we just added this line
-if re.search('^[ACGTU]+$', args.seq):  #If it only contains ACTGU it is DNA/RNA
-    if re.search('T', args.seq): # If it contains T and no Us it is DNA
-        print ('The sequence is DNA')
-    elif re.search('U', args.seq): # If it contains Us it is RNA
-        print ('The sequence is RNA')
-    else:
-        print ('The sequence can be DNA or RNA') 
+# First check that the sequence contains only the valid letters A, C, G, T, U
+if not re.fullmatch(r'[ACGTU]+', seq):
+    print('The sequence is not DNA nor RNA')
 else:
-    print ('The sequence is not DNA nor RNA')
+    # Now decide between DNA, RNA, or ambiguous
+    has_t = 'T' in seq
+    has_u = 'U' in seq
 
-# IF look to look for motifs
-if args.motif:
-    args.motif = args.motif.upper()
-    print(f'Motif search enabled: looking for motif "{args.motif}" in sequence "{args.seq}"... ', end = '')
-    if re.search(args.motif, args.seq):
-        print("FOUND")
+    if has_t and has_u:
+        # contains both T and U → impossible
+        print('The sequence is not DNA nor RNA')
+    elif has_t:
+        print('The sequence is DNA')
+    elif has_u:
+        print('The sequence is RNA')
     else:
-        print("NOT FOUND")
+        # only A, C, G → could be either
+        print('The sequence can be DNA or RNA')
 
-parser.add_argument("-m", "--motif", type = str, required = False, help = "Motif")
-
-#I added this in the master branch
-# I added this in the motif branch
+# Optional motif search
+if args.motif:
+    motif = args.motif.upper()
+    print(f'Motif search enabled: looking for motif "{motif}" in sequence "{seq}"... ', end='')
+    if re.search(motif, seq):
+        print('FOUND')
+    else:
+        print('NOT FOUND')
