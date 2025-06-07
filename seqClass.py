@@ -4,6 +4,7 @@ import sys
 import re
 from argparse import ArgumentParser
 
+# Changed: Moved motif argument definition _before_ parsing args
 parser = ArgumentParser(
     description='Classify a sequence as DNA, RNA, ambiguous (DNA or RNA), or neither, and optionally search for a motif'
 )
@@ -15,6 +16,8 @@ parser.add_argument('-m', '--motif',
                     type=str,
                     help='Motif to search for')
 
+# Changed: Use `re.fullmatch` to ensure entire string matches valid letters
+# First check valid alphabet
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
@@ -27,6 +30,7 @@ if not re.fullmatch(r'[ACGTU]+', seq):
     print('The sequence is not DNA nor RNA')
 else:
     # Now decide between DNA, RNA, or ambiguous
+    # Changed: Distinguish four cases by presence of T and U
     has_t = 'T' in seq
     has_u = 'U' in seq
 
@@ -42,6 +46,7 @@ else:
         print('The sequence can be DNA or RNA')
 
 # Optional motif search
+# Changed: Motif search works because --motif was defined earlier
 if args.motif:
     motif = args.motif.upper()
     print(f'Motif search enabled: looking for motif "{motif}" in sequence "{seq}"... ', end='')
